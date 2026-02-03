@@ -23,7 +23,7 @@ git clone https://github.com/FinTechTonic/autonomous-agent.git && cd autonomous-
 npm install
 ```
 
-**OpenClaw / Moltbot:** See [adapters/openclaw/SKILL.md](adapters/openclaw/SKILL.md) or use your platform’s skill install (e.g. ClawHub). Then point `MCP_SERVER_URL` at your MCP server.
+**OpenClaw / MoltBook / Moltbot:** Load the skill from `skills/autonomous-agent/` or [adapters/openclaw/SKILL.md](adapters/openclaw/SKILL.md). See [MoltBook / OpenClaw](#moltbook--openclaw) below. Then point `MCP_SERVER_URL` at your MCP server.
 
 ## Quick Start
 
@@ -114,6 +114,9 @@ autonomous/
 │   ├── setup.js          # EVM wallet generation
 │   ├── setup-aptos.js    # Aptos wallet generation
 │   └── show-agent-addresses.js
+├── skills/               # MoltBook/OpenClaw (AgentSkills layout)
+│   └── autonomous-agent/
+│       └── SKILL.md
 ├── adapters/             # OpenClaw, OpenAI, Anthropic, local
 ├── .env.example
 └── package.json
@@ -138,11 +141,42 @@ autonomous/
 ## Capability + adapters
 
 - **Capability:** Core (`src/`) — MCP client, x402 flow, local tools. No OpenAI/Claw/Anthropic logic in code.
-- **Adapters:** `adapters/` — how each platform uses the capability:
-  - [adapters/openclaw/SKILL.md](adapters/openclaw/SKILL.md) — OpenClaw / Moltbot
-  - [adapters/openai/openapi.yaml](adapters/openai/openapi.yaml) — Custom GPTs / Assistants
-  - [adapters/anthropic/tools.json](adapters/anthropic/tools.json) — Claude tools
-  - [adapters/local/README.md](adapters/local/README.md) — LM Studio, AutoGen, CrewAI
+- **Adapters:** How each platform uses the capability:
+  - **MoltBook / OpenClaw / Moltbot:** `skills/autonomous-agent/SKILL.md` (AgentSkills-compatible; [see below](#moltbook--openclaw)) or [adapters/openclaw/SKILL.md](adapters/openclaw/SKILL.md)
+  - **OpenAI:** [adapters/openai/openapi.yaml](adapters/openai/openapi.yaml) — Custom GPTs / Assistants
+  - **Claude / Anthropic:** [adapters/anthropic/tools.json](adapters/anthropic/tools.json) — Claude tools
+  - **Local / OSS:** [adapters/local/README.md](adapters/local/README.md) — LM Studio, AutoGen, CrewAI
+
+## MoltBook / OpenClaw
+
+This repo is optimized for **easy skill loading** in MoltBook and OpenClaw (Claude, Anthropic, OpenAI, and other providers work via the same agent; the skill tells the assistant how to run it).
+
+- **Skill layout:** The skill lives in `skills/autonomous-agent/SKILL.md` (AgentSkills-compatible, single-line frontmatter, `metadata.openclaw` gating). OpenClaw/MoltBook loads skills from `skills/` subfolders.
+- **Load options:**
+  1. **extraDirs:** Add this repo path to `~/.openclaw/openclaw.json` under `skills.load.extraDirs`. OpenClaw will scan `skills/` and load `autonomous-agent`.
+  2. **Workspace:** Clone the repo and use it as your OpenClaw workspace; workspace skills are loaded from `<workspace>/skills`.
+  3. **Managed skills:** Copy `skills/autonomous-agent` to `~/.openclaw/skills/` for all agents on the machine.
+  4. **ClawHub:** When published, install with `clawhub install autonomous-agent` (installs into `./skills` by default).
+- **Config:** In `skills.entries["autonomous-agent"]` you can set `enabled`, `env`, or `apiKey` (maps to `primaryEnv`). Ensure `MCP_SERVER_URL`, x402 facilitator URLs, and LLM/env are set for the agent run.
+- **Run:** From the **repository root** (parent of `skills/`), run `node src/run-agent.js "your message"`.
+
+Example `~/.openclaw/openclaw.json` to load this repo’s skills:
+
+```json
+{
+  "skills": {
+    "load": {
+      "extraDirs": ["/path/to/autonomous-agent"]
+    },
+    "entries": {
+      "autonomous-agent": {
+        "enabled": true,
+        "env": { "MCP_SERVER_URL": "https://borrower.replit.app" }
+      }
+    }
+  }
+}
+```
 
 ## Deployment order
 

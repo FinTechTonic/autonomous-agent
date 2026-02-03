@@ -10,6 +10,7 @@
   "files": [
     "src",
     "adapters",
+    "skills",
     ".env.example",
     "README.md",
     "SKILL-clawdhub.md",

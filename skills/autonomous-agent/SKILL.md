@@ -10,10 +10,10 @@ Autonomous agent that calls x402-protected MCP tools: stock prediction, backtest
 
 ## Installation
 
-Clone or copy the repo. When loaded from OpenClaw/MoltBook, the skill folder is `{baseDir}`; run commands from the **repo root** (parent of `adapters/openclaw` or of `skills/autonomous-agent`).
+When this skill is loaded from the **autonomous-agent** repo, the repo root is the parent of the skill folder `{baseDir}`. Clone and install from the repo root:
 
 ```bash
-# From repository root
+# From repository root (parent of {baseDir} when using this repo)
 git clone https://github.com/FinTechTonic/autonomous-agent.git && cd autonomous-agent
 npm install
 ```
@@ -47,4 +47,4 @@ node src/run-agent.js
 | `get_agent_reputation_score` / `get_borrower_score` | CornerStone scores | ~1¢ |
 | `get_agent_reputation_score_by_email` / `get_borrower_score_by_email` | CornerStone scores by email (extra fee) | base + extra |
 
-Whitelist your agent at the onboarding flow (e.g. https://borrower.replit.app/flow.html or `MCP_SERVER_URL`/flow.html) so the server allows your wallet.
+Whitelist your agent at https://borrower.replit.app/flow.html so the server allows your wallet.
