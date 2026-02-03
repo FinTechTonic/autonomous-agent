@@ -1,6 +1,6 @@
 {
   "name": "cornerstone-autonomous-agent",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CornerStone Agentic Score: autonomous agent that uses an x402-enabled MCP server to predict tickers, backtest trading strategies, and open bank accounts. Handles 402 Payment Required (pay via Aptos/Ethereum facilitator and retry). LangChain.js ReAct agent with Hugging Face inference (OpenAI-compatible endpoint).",
   "type": "module",
   "main": "src/run-agent.js",
