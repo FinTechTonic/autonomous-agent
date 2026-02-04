@@ -20,8 +20,7 @@ npm install
 
 Set `MCP_SERVER_URL` to `https://borrower.replit.app`. Copy `.env.example` to `.env` and set:
 
-- `MCP_SERVER_URL` – MCP server base URL
-- `X402_FACILITATOR_URL` – x402 facilitator (verify/settle)
+- `MCP_SERVER_URL` – `https://borrower.replit.app`
 - `LLM_BASE_URL`, `HUGGINGFACE_API_KEY` or `HF_TOKEN`, `LLM_MODEL` – for inference
 - `APTOS_WALLET_PATH`, `EVM_WALLET_PATH` (or `EVM_PRIVATE_KEY`) – for payments
 

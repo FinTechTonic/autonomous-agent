@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_PATH = join(__dirname, '..', 'package.json');
-const REPO = 'surfer77/evm-wallet-skill';
+const REPO = 'FinTechTonic/autonomous-agent';
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const STATE_FILE = join(__dirname, '..', '.update-check.json');
 
@@ -33,7 +33,7 @@ export function getLocalVersion() {
  */
 async function fetchLatestVersion() {
   // Try GitHub API (works for public repos, or private with GH_TOKEN)
-  const headers = { 'User-Agent': 'evm-wallet-skill' };
+  const headers = { 'User-Agent': 'autonomous-agent' };
   
   // Check for GitHub token in environment
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
@@ -157,7 +157,7 @@ export async function printUpdateNag() {
   try {
     const update = await checkForUpdate();
     if (update) {
-      console.error(`\n⚠️  Update available: ${update.currentVersion} → ${update.latestVersion} — run: clawdhub update evm-wallet-skill\n`);
+      console.error(`\n⚠️  Update available: ${update.currentVersion} → ${update.latestVersion} — run: clawdhub update autonomous-agent\n`);
     }
   } catch {
     // Silent fail — never block the main command
@@ -183,7 +183,7 @@ if (process.argv[1] && process.argv[1].includes('check-update')) {
     console.log(`Current version: ${localVersion}`);
     if (update) {
       console.log(`⚠️  Update available: ${update.currentVersion} → ${update.latestVersion}`);
-      console.log(`Run: clawdhub update evm-wallet-skill`);
+      console.log(`Run: clawdhub update autonomous-agent`);
     } else {
       console.log('✅ Up to date');
     }

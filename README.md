@@ -178,6 +178,37 @@ Example `~/.openclaw/openclaw.json` to load this repo’s skills:
 }
 ```
 
+### Publishing this skill on MoltBook / OpenClaw (ClawHub)
+
+[ClawHub](https://clawhub.ai) is the public skill registry for MoltBook and OpenClaw. Publishing lets others install your skill with `clawhub install autonomous-agent`.
+
+1. **Install the ClawHub CLI**
+   ```bash
+   npm i -g clawhub
+   ```
+   or `pnpm add -g clawhub`.
+
+2. **Log in** (GitHub account required; must be at least one week old to publish)
+   ```bash
+   clawhub login
+   ```
+   This opens a browser to authenticate. For CI or headless: `clawhub login --token <token>`.
+
+3. **Publish the skill** from the repo root:
+   ```bash
+   clawhub publish ./skills/autonomous-agent --slug autonomous-agent --name "Autonomous Agent (x402)" --version 1.0.0 --changelog "Initial release" --tags latest
+   ```
+   - `--slug` must match the folder name (`autonomous-agent`) so installs work as `clawhub install autonomous-agent`.
+   - Omit `--version` / `--changelog` to be prompted. For later releases, bump version (e.g. `--version 1.0.1`) and add a `--changelog` line.
+
+4. **Update an existing skill** (after you change `SKILL.md` or metadata): run `publish` again with a new version:
+   ```bash
+   clawhub publish ./skills/autonomous-agent --slug autonomous-agent --name "Autonomous Agent (x402)" --version 1.0.1 --changelog "Description of changes" --tags latest
+   ```
+   Alternatively, `clawhub sync --root . --all --bump patch --changelog "Description"` scans the repo and publishes changed skills with a bumped version.
+
+After publishing, the skill appears on [clawhub.ai](https://clawhub.ai) and users can run `clawhub install autonomous-agent` (into `./skills` by default).
+
 ## Deployment order
 
 1. **x402 facilitator** — Use public (e.g. https://x402-navy.vercel.app/facilitator) for full demo; or run local and set X402_EVM_FACILITATOR_URL to public for open_bank_account.
@@ -190,8 +221,6 @@ Example `~/.openclaw/openclaw.json` to load this repo’s skills:
 - [Canteen App – Aptos x402](https://canteenapp-aptos-x402.notion.site/) — wallet hydration and crediting
 - [LangChain.js MCP](https://js.langchain.com/docs/integrations/toolkits/mcp_toolbox)
 - [Hugging Face Inference – OpenAI-compatible](https://huggingface.co/docs/api-inference/en/index)
-- [evm-wallet-skill](https://github.com/surfer77/evm-wallet-skill) — self-sovereign EVM wallet pattern for agents
-
 ## License
 
 GPL-2.0-only. Use of this software is also subject to the [Responsible AI License (RAIL)](https://www.licenses.ai/). See [LICENSE.md](LICENSE.md) (GPL-2) and [RAIL](https://www.licenses.ai/).
