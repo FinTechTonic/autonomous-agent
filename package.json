@@ -5,7 +5,9 @@
   "type": "module",
   "main": "src/run-agent.js",
   "bin": {
-    "cornerstone-agent": "src/run-agent.js"
+    "cornerstone-agent": "src/run-agent.js",
+    "cornerstone-agent-attest-aptos": "src/attest-aptos-wallet.js",
+    "cornerstone-agent-attest-evm": "src/attest-evm-wallet.js"
   },
   "files": [
     "src",
@@ -31,7 +33,9 @@
     "swap": "node src/swap.js",
     "check-update": "node src/check-update.js",
     "agent": "node src/run-agent.js",
-    "start": "node src/run-agent.js"
+    "start": "node src/run-agent.js",
+    "attest:aptos": "node src/attest-aptos-wallet.js",
+    "attest:evm": "node src/attest-evm-wallet.js"
   },
   "dependencies": {
     "@langchain/core": "^0.3.0",

@@ -151,7 +151,7 @@ export function createLocalTools() {
         saveEvmWallet(wallet);
         return JSON.stringify({
           success: true,
-          message: `EVM wallet created (${net}). Whitelist this address at http://localhost:4024/flow.html and fund with ETH on Base Sepolia (testnet) or Base (mainnet) for open_bank_account.`,
+          message: `EVM wallet created (${net}). Whitelist this address at http://localhost:4024/flow.html and fund with ETH on Base Sepolia (testnet) or Base (mainnet) for link_bank_account.`,
           address: wallet.address,
           network: net,
         });
@@ -232,7 +232,7 @@ export function createLocalTools() {
         }
         return JSON.stringify({
           success: true,
-          message: 'EVM (Base Sepolia) has no programmatic faucet in this agent. Fund manually: open a Base Sepolia faucet, enter the address below, request test ETH. Needed for open_bank_account (~$3.65). Whitelist this address at http://localhost:4024/flow.html.',
+          message: 'EVM (Base Sepolia) has no programmatic faucet in this agent. Fund manually: open a Base Sepolia faucet, enter the address below, request test ETH. Needed for link_bank_account (~$3.65). Whitelist this address at http://localhost:4024/flow.html.',
           address,
           faucet_url: BASE_SEPOLIA_FAUCET,
         });

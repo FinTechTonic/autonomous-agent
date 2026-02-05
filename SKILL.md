@@ -1,12 +1,12 @@
 ---
 name: autonomous-agent
-description: CreditNexus x402 agent. Use when the user wants stock predictions, backtests, or to open a bank account. Payment-protected MCP tools (run_prediction, run_backtest, open_bank_account) with x402 flow (Aptos + Base). Agent handles 402 → pay → retry autonomously.
+description: CreditNexus x402 agent. Use when the user wants stock predictions, backtests, bank linking, or agent/borrower scores. Payment-protected MCP tools (run_prediction, run_backtest, link_bank_account, get_agent_reputation_score, get_borrower_score, and by-email variants) with x402 flow (Aptos + Base). Agent handles 402 → pay → retry autonomously. Supports wallet attestation (signing) for onboarding.
 metadata: {"clawdbot":{"emoji":"📈","homepage":"https://github.com/FinTechTonic/autonomous-agent","requires":{"bins":["node","npm"]}}}
 ---
 
 # CreditNexus x402 Agent Skill
 
-Autonomous agent that calls x402-protected MCP tools: stock prediction, backtest, open bank account. Handles payment flow (402 → pay → retry) with Aptos (prediction/backtest) and Base (banking).
+Autonomous agent that **creates, funds, and uses** Aptos and EVM wallets, then calls x402-paid MCP tools (stock prediction, backtest, link_bank_account, agent/borrower scores). Handles payment flow (402 → pay → retry with `payment_payload`) with Aptos and Base. Supports **wallet attestation** (signing) for onboarding. Use when the user wants wallet setup, funding, balances, predictions, backtests, bank linking, scores, or token operations.
 
 ## Installation
 
@@ -17,28 +17,7 @@ git clone https://github.com/FinTechTonic/autonomous-agent.git && cd autonomous-
 npm install
 ```
 
-Set `MCP_SERVER_URL` to your x402 MCP server (e.g. `https://borrower.replit.app`). Copy `.env.example` to `.env` and configure LLM and wallet paths.
-
-## Run the agent
-
-From the **repository root** (where `package.json` and `src/` live):
-
-```bash
-node src/run-agent.js "Run a 30-day prediction for AAPL"
-# Or interactive
-node src/run-agent.js
-```
-
-**Source:** [FinTechTonic/autonomous-agent](https://github.com/FinTechTonic/autonomous-agent)
----
-name: autonomous-agent
-description: CreditNexus x402 agent. Use when the user wants to create and use wallets (Aptos/EVM), fund wallets, check balances, run stock predictions, backtests, open bank accounts, or transfer/swap tokens. Payment-protected MCP tools with x402 flow (Aptos + Base). Agent handles 402 → pay → retry autonomously.
-metadata: {"clawdbot":{"emoji":"📈","homepage":"https://github.com/FinTechTonic/autonomous-agent","requires":{"bins":["node","npm"]}}}
----
-
-# Autonomous Agent (x402) – Skill
-
-Autonomous agent that **creates, funds, and uses** Aptos and EVM wallets, then calls x402-paid MCP tools (stock prediction, backtest, open bank account). Handles payment flow (402 → pay → retry) with Aptos and Base. Use this skill when the user wants wallet setup, funding, balances, predictions, backtests, banking, or token operations.
+Set `MCP_SERVER_URL` to your x402 MCP server (e.g. `https://borrower.replit.app` or `https://arnstein.ch`). Copy `.env.example` to `.env` and configure LLM and wallet paths.
 
 ---
 
@@ -53,7 +32,7 @@ Autonomous agent that **creates, funds, and uses** Aptos and EVM wallets, then c
 ### Fund wallets
 
 - **Fund Aptos wallet** – `credit_aptos_wallet`: on devnet uses programmatic faucet; on testnet returns instructions and Aptos faucet URL. Needed for `run_prediction` and `run_backtest` (~6¢ USDC).
-- **Fund EVM wallet** – `fund_evm_wallet`: returns address and instructions (Base Sepolia faucet, etc.). Needed for `open_bank_account` (~$3.65 on Base).
+- **Fund EVM wallet** – `fund_evm_wallet`: returns address and instructions (Base Sepolia faucet, etc.). Needed for `link_bank_account` (~$3.65 on Base).
 
 User must **whitelist** every agent address at the onboarding flow (e.g. `http://localhost:4024/flow.html` or your MCP server’s flow) before paid tools succeed.
 
@@ -66,7 +45,8 @@ User must **whitelist** every agent address at the onboarding flow (e.g. `http:/
 
 - **Stock prediction** – `run_prediction` (symbol, horizon in days). Cost ~6¢ (Aptos).
 - **Backtest** – `run_backtest` (trading strategy). Cost ~6¢ (Aptos).
-- **Open bank account** – `open_bank_account` (CornerStone bank link). Cost ~$3.65 (EVM/Base).
+- **Link bank account** – `link_bank_account` (CornerStone/Plaid bank link token). Cost ~5¢ configurable (EVM/Base).
+- **Scores** – `get_agent_reputation_score`, `get_borrower_score` (by wallet); `get_agent_reputation_score_by_email`, `get_borrower_score_by_email` (when SCORE_BY_EMAIL_ENABLED). x402 or lender credits.
 
 The agent handles 402 Payment Required automatically: verify → settle → retry with payment signature.
 
@@ -74,14 +54,16 @@ The agent handles 402 Payment Required automatically: verify → settle → retr
 
 | Task | Command |
 |------|--------|
-| Generate Aptos wallet | `node src/setup-aptos.js` |
-| Generate EVM wallet | `node src/setup.js` |
-| Show addresses for whitelist | `node src/show-agent-addresses.js` |
+| Generate Aptos wallet | `npm run setup:aptos` |
+| Generate EVM wallet | `npm run setup` |
+| Show addresses for whitelist | `npm run addresses` |
 | Credit Aptos (devnet) | `npm run credit:aptos` (set `APTOS_FAUCET_NETWORK=devnet`) |
-| EVM balance | `node src/balance.js <chain>` |
-| Transfer ETH/tokens | `node src/transfer.js <chain> <to> <amount> [tokenAddress]` |
-| Swap tokens (Odos) | `node src/swap.js <chain> <fromToken> <toToken> <amount>` |
-| Run agent | `node src/run-agent.js "Run a 30-day prediction for AAPL"` or `node src/run-agent.js` (interactive) |
+| EVM balance | `npm run balance -- <chain>` |
+| Transfer ETH/tokens | `npm run transfer -- <chain> <to> <amount> [tokenAddress]` |
+| Swap tokens (Odos) | `npm run swap -- <chain> <fromToken> <toToken> <amount>` |
+| Run agent | `npx cornerstone-agent "Run a 30-day prediction for AAPL"` or `npx cornerstone-agent` (interactive); from repo `npm run agent -- "..."` |
+| Attest Aptos wallet | `npm run attest:aptos` or `npx cornerstone-agent-attest-aptos` (output → POST /attest/aptos) |
+| Attest EVM wallet | `npm run attest:evm` or `npx cornerstone-agent-attest-evm` (output → POST /attest/evm) |
 
 ---
 
@@ -93,7 +75,9 @@ Use when the user wants to:
 - **Fund** agent wallets (faucet instructions or programmatic credit).
 - **Check** Aptos or EVM balances.
 - Run **stock predictions** or **backtests** (paid via Aptos).
-- **Open a bank account** (paid via Base).
+- **Link a bank account** (paid via Base; `link_bank_account`).
+- **Get agent/borrower scores** (by wallet or by email when enabled).
+- **Sign wallet attestations** for onboarding (attest:aptos, attest:evm).
 - **Transfer** or **swap** tokens from the agent wallet (via CLI or context).
 
 ---
@@ -111,9 +95,10 @@ Use when the user wants to:
 From the **repository root** (where `package.json` and `src/` live):
 
 ```bash
-node src/run-agent.js "Create an Aptos wallet, then run a 30-day prediction for AAPL"
+npx cornerstone-agent "Create an Aptos wallet, then run a 30-day prediction for AAPL"
 # Or interactive
-node src/run-agent.js
+npx cornerstone-agent
+# Or from repo: npm run agent -- "..." or node src/run-agent.js "..."
 ```
 
 **Source:** [FinTechTonic/autonomous-agent](https://github.com/FinTechTonic/autonomous-agent)

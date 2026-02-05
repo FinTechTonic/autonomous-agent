@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Print all agent wallet addresses for whitelisting during a demo.
- * Run from demo_mcp/autonomous: node src/show-agent-addresses.js
+ * Run from agent project: node src/show-agent-addresses.js (or npm run addresses).
+ * Package: https://github.com/FinTechTonic/autonomous-agent
  * Then add each address at http://localhost:4024/flow.html (EVM and Aptos rows; optional testnet/mainnet tag).
  */
 
@@ -24,7 +25,7 @@ if (aptosList.length) {
 if (evmList.length) {
   evmList.forEach((w, i) => {
     const net = w.network ? ` [${w.network}]` : '';
-    console.log(`  EVM (open_bank_account)${net}:             ${w.address}`);
+    console.log(`  EVM (link_bank_account)${net}:             ${w.address}`);
   });
 } else {
   console.log('  EVM: none. Run: node src/setup.js or create_evm_wallet (optionally network: "testnet"|"mainnet"); or set EVM_PRIVATE_KEY.');
