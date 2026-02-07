@@ -52,11 +52,11 @@ async function main() {
     const evmMainnetPk = generatePrivateKey();
     result.evm_testnet = {
       privateKey: toHex(evmTestnetPk),
-      address: privateKeyToAccount(evmTestnetPk).address,
+      address: privateKeyToAccount(evmTestnetPk).address.toLowerCase(),
     };
     result.evm_mainnet = {
       privateKey: toHex(evmMainnetPk),
-      address: privateKeyToAccount(evmMainnetPk).address,
+      address: privateKeyToAccount(evmMainnetPk).address.toLowerCase(),
     };
   } catch (e) {
     if (jsonOut) console.log(JSON.stringify({ error: e.message }));
