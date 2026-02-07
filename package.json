@@ -5,9 +5,9 @@
   "type": "module",
   "main": "src/run-agent.js",
   "bin": {
-    "cornerstone-agent": "src/run-agent.js",
-    "cornerstone-agent-attest-aptos": "src/attest-aptos-wallet.js",
-    "cornerstone-agent-attest-evm": "src/attest-evm-wallet.js"
+    "autonomous": "src/cli.js",
+    "cornerstone-autonomous-agent": "src/cli.js",
+    "cornerstone-agent": "src/run-agent.js"
   },
   "files": [
     "src",
