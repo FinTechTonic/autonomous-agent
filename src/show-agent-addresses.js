@@ -3,7 +3,7 @@
  * Print all agent wallet addresses for whitelisting during a demo.
  * Run from agent project: node src/show-agent-addresses.js (or npm run addresses).
  * Package: https://github.com/FinTechTonic/autonomous-agent
- * Then add each address at http://localhost:4024/flow.html (EVM and Aptos rows; optional testnet/mainnet tag).
+ * Then add each address at https://arnstein.ch/flow.html (EVM and Aptos rows; optional testnet/mainnet tag).
  */
 
 import { getAllWalletInfos as getAptosAll, exists as aptosExists } from './lib/aptos/wallet.js';
@@ -12,7 +12,7 @@ import { getAllWalletInfos as getEvmAll, exists as evmExists } from './lib/walle
 const aptosList = aptosExists() ? getAptosAll() : [];
 const evmList = evmExists() ? getEvmAll() : [];
 
-console.log('\nAgent wallet addresses (whitelist these at http://localhost:4024/flow.html):');
+console.log('\nAgent wallet addresses (whitelist these at https://arnstein.ch/flow.html):');
 console.log('  Add multiple EVM and Aptos rows as needed; optionally tag each as testnet or mainnet.\n');
 if (aptosList.length) {
   aptosList.forEach((w, i) => {

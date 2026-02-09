@@ -1,12 +1,12 @@
-# Autonomous Agent – x402 MCP + LangChain.js
+# CornerStone MCP x402 Skill – Tools for Agents
 
 **Published as [cornerstone-autonomous-agent](https://www.npmjs.com/package/cornerstone-autonomous-agent)** on npm; **source: [FinTechTonic/autonomous-agent](https://github.com/FinTechTonic/autonomous-agent)**.
 
-Autonomous AI agent for **x402-paid MCP tools**: predict tickers, backtest strategies, link bank accounts, and query agent/borrower scores. Pays with **Aptos** or **EVM** via the x402 facilitator—no OpenAI key; uses **Hugging Face** for the LLM. Built for Cursor, OpenClaw/Moltbot, and headless runs.
+A **skill** that gives agents a set of **x402-paid MCP tools**: predict tickers, backtest strategies, link bank accounts, and query agent/borrower scores. Agents using this skill pay with **Aptos** or **EVM** via the x402 facilitator. Designed for marketplaces where agents can autonomously download and use the skill; also usable from Cursor, OpenClaw/Moltbot, and headless runners.
 
 ## Why?
 
-Most agent demos need a full backend and separate API keys. This agent talks to an **x402 MCP server**, pays with its own Aptos and EVM wallets (verify → settle), and uses an OpenAI-compatible LLM (e.g. Hugging Face). You get **run_prediction**, **run_backtest**, **link_bank_account**, and **score tools** (get_agent_reputation_score, get_borrower_score, by-email variants) with minimal setup—whitelist your agent, fund wallets, run. The server offers both Aptos and EVM payment options; the agent pays with whichever you prefer or have funded.
+Agents need tools, not a full backend. This skill provides **run_prediction**, **run_backtest**, **link_bank_account**, and **score tools** (get_agent_reputation_score, get_borrower_score, by-email variants). Agents using it talk to an **x402 MCP server**, pay with their own Aptos and EVM wallets (verify → settle), and get results after minimal setup—whitelist the agent’s addresses, fund wallets, then the agent can call the tools. The server offers both Aptos and EVM payment options; the skill handles 402 → pay → retry so the agent just calls the tool.
 
 ## Install
 
@@ -16,7 +16,7 @@ Most agent demos need a full backend and separate API keys. This agent talks to 
 npm install cornerstone-autonomous-agent
 ```
 
-Copy the package’s `.env.example` into your project and set `MCP_SERVER_URL`, `X402_FACILITATOR_URL`, `HUGGINGFACE_API_KEY`, `LLM_MODEL`, and wallet paths. See [Config](#config).
+Copy the package’s `.env.example` into your project and set `X402_FACILITATOR_URL`, `HUGGINGFACE_API_KEY`, `LLM_MODEL`, and wallet paths. See [Config](#config).
 
 ### From source
 
@@ -25,8 +25,7 @@ git clone https://github.com/FinTechTonic/autonomous-agent.git && cd autonomous-
 npm install
 ```
 
-**OpenClaw / Moltbot:** See [adapters/openclaw/SKILL.md](adapters/openclaw/SKILL.md) or use your platform’s skill install (e.g. ClawHub). Then point `MCP_SERVER_URL` at your MCP server.
-
+**OpenClaw / Moltbot:** See [adapters/openclaw/SKILL.md](adapters/openclaw/SKILL.md) or use your platform’s skill install (e.g. ClawHub). 
 ## Quick Start
 
 **Important:** Another npm package is named [autonomous](https://www.npmjs.com/package/autonomous). To run **this** package without installing, always use the full name: **`npx cornerstone-autonomous-agent`**. After you `npm install cornerstone-autonomous-agent`, the short binary `autonomous` in that project runs this CLI.
@@ -62,7 +61,6 @@ Copy `.env.example` to `.env` and set:
 
 | Variable | Description |
 |----------|-------------|
-| `MCP_SERVER_URL` | x402 MCP server base URL (e.g. http://localhost:4023 or https://3001-borrower.replit.app) |
 | `X402_FACILITATOR_URL` | Facilitator base URL (Aptos + EVM verify/settle). Use public (e.g. https://x402-navy.vercel.app/facilitator) for full demo. |
 | `X402_EVM_FACILITATOR_URL` | Optional. EVM facilitator; defaults to X402_FACILITATOR_URL. |
 | `PREFERRED_PAYMENT_ORDER` | Optional. Comma-separated `network|asset` (e.g. `aptos:2|usdc,eip155:84532|usdc`) to choose payment option when server returns multiple. |
@@ -71,7 +69,7 @@ Copy `.env.example` to `.env` and set:
 | `LLM_MODEL` | Model ID (e.g. meta-llama/Llama-3.2-3B-Instruct) |
 | `APTOS_WALLET_PATH` | Aptos wallet JSON path. Multi-wallet: ~/.aptos-agent-wallets.json. |
 | `EVM_WALLET_PATH` | EVM wallet path. Multi-wallet: ~/.evm-wallets.json. Or set EVM_PRIVATE_KEY. |
-| `BASE_SEPOLIA_RPC` | Optional; Base Sepolia RPC. Agent supports all EVM chains in lib/chains.js (Base, Ethereum, Polygon, etc.). |
+| `BASE_SEPOLIA_RPC` | Optional; Base Sepolia RPC. Skill supports all EVM chains in lib/chains.js (Base, Ethereum, Polygon, etc.). |
 
 ## Commands
 
@@ -82,16 +80,16 @@ Use **`npx cornerstone-autonomous-agent <command>`** (or, in a project that has 
 | `autonomous setup` | Generate EVM wallet (single; for multi use agent tool create_evm_wallet) |
 | `autonomous setup:aptos` | Generate Aptos wallet (single; for multi use create_aptos_wallet) |
 | `autonomous setup:evm:multichain` | Generate EVM multi-chain wallet |
-| `autonomous addresses` | Print all Aptos and EVM addresses for whitelisting at flow.html |
+| `autonomous addresses` | Print all Aptos and EVM addresses for whitelisting at https://arnstein.ch/flow.html |
 | `autonomous attest:aptos` | Sign attestation for Aptos wallet (set `APTOS_PRIVATE_KEY` or `APTOS_TESTNET_*`); submit to POST /attest/aptos |
 | `autonomous attest:evm` | Sign attestation for EVM wallet; submit to POST /attest/evm |
 | `autonomous balance [chain]` | EVM balance |
 | `autonomous transfer` | Transfer (see script for args) |
 | `autonomous contract` | Contract interaction helper |
 | `autonomous swap` | Swap helper |
-| `autonomous` or `autonomous agent` or `autonomous start [message]` | Run agent (default: demo balance + prediction) |
-| `npm run credit:aptos` | Credit Aptos agent (devnet: programmatic; testnet: instructions) |
-| `npx cornerstone-agent [message]` | Run agent (legacy bin name) |
+| `autonomous` or `autonomous agent` or `autonomous start [message]` | Run skill demo (default: balance + prediction) |
+| `npm run credit:aptos` | Credit Aptos wallet (devnet: programmatic; testnet: instructions) |
+| `npx cornerstone-agent [message]` | Run skill demo (legacy bin name) |
 
 **Crediting Aptos:** Testnet has no programmatic faucet—use [Aptos testnet faucet](https://aptos.dev/network/faucet). Devnet: `APTOS_FAUCET_NETWORK=devnet npm run credit:aptos`. See [Canteen – Aptos x402](https://canteenapp-aptos-x402.notion.site/).
 
@@ -102,10 +100,12 @@ Use **`npx cornerstone-autonomous-agent <command>`** (or, in a project that has 
 | `run_prediction` | Stock prediction (symbol, horizon) | x402: Aptos or EVM |
 | `run_backtest` | Backtest trading strategy | x402: Aptos or EVM |
 | `link_bank_account` | CornerStone bank link (Plaid) | x402: Aptos or EVM |
-| `get_agent_reputation_score` | Agent reputation score (allowlisted wallet) | x402 or lender credits |
-| `get_borrower_score` | Borrower score (100 or 100+X when bank linked) | x402 or lender credits |
+| `get_agent_reputation_score` | Reputation Score: measures the agent's ability to transact using x402 | x402 or lender credits |
+| `get_borrower_score` | Borrower score: measures real borrower behavior | x402 or lender credits |
 | `get_agent_reputation_score_by_email` | Reputation score by email (resolves to agent) | x402 or lender credits |
 | `get_borrower_score_by_email` | Borrower score by email | x402 or lender credits |
+
+**Score definitions:** Reputation Score measures an agent’s ability to transact using x402. Borrower score measures real borrower behavior.
 
 All paid tools accept **both Aptos and EVM**; the server returns 402 with multiple options. Use `PREFERRED_PAYMENT_ORDER` to prefer one chain/asset.
 
@@ -119,11 +119,11 @@ All paid tools accept **both Aptos and EVM**; the server returns 402 with multip
 ## x402 Flow
 
 ```
-Agent calls MCP tool
+Agent (using this skill) calls MCP tool
   → Server returns 402 + payment requirements (single or array of options: USDC, APT, native ETH)
-  → Agent picks one option (by preferredPaymentOrder or first), builds payload (Aptos or EVM)
-  → Agent calls facilitator /verify then /settle
-  → Agent retries request with payment_payload
+  → Skill picks one option (by preferredPaymentOrder or first), builds payload (Aptos or EVM)
+  → Skill calls facilitator /verify then /settle
+  → Skill retries request with payment_payload
   → Server returns result + payment_receipt
 ```
 
@@ -141,7 +141,7 @@ autonomous/
 │   │   ├── evm/          # EVM wallet, signPayment (Base)
 │   │   └── x402/         # Payment types, verify/settle flow
 │   ├── cli.js            # CLI router (autonomous / cornerstone-autonomous-agent)
-│   ├── run-agent.js      # Agent entrypoint
+│   ├── run-agent.js      # Skill demo entrypoint (agent + tools)
 │   ├── setup.js          # EVM wallet generation
 │   ├── setup-aptos.js    # Aptos wallet generation
 │   ├── attest-aptos-wallet.js / attest-evm-wallet.js
@@ -151,26 +151,26 @@ autonomous/
 └── package.json
 ```
 
-**Core pieces:** `lib/mcp` — MCP client and 402 retry; `lib/aptos` / `lib/evm` — wallets and payment signing; `lib/x402` — verify/settle; `agent/` — LangChain.js ReAct agent and tools.
+**Core pieces:** `lib/mcp` — MCP client and 402 retry; `lib/aptos` / `lib/evm` — wallets and payment signing; `lib/x402` — verify/settle; `agent/` — LangChain.js ReAct runner and tools (for agents using the skill).
 
 ## Tech Stack
 
 - **Runtime:** Node.js 18+
-- **Agent:** LangChain.js (ReAct), OpenAI-compatible LLM (e.g. Hugging Face)
+- **Runner:** LangChain.js (ReAct), OpenAI-compatible LLM (e.g. Hugging Face) for the demo; agents use the tools via their own runtime
 - **MCP:** [Model Context Protocol](https://modelcontextprotocol.io) + x402 payment flow
 - **Chains:** Aptos (viem-style + @aptos-labs/ts-sdk), EVM (viem) for Base Sepolia/Base
 - **Payments:** x402 facilitator (verify/settle), local wallet storage
 
 ## Security
 
-- **Wallets:** Stored locally (e.g. `~/.aptos-agent-wallets.json`, `~/.evm-wallets.json`); private keys not logged or sent except as signed payloads to the facilitator.
+- **Wallets:** Stored locally (e.g. `~/.aptos-agent-wallets.json`, `~/.evm-wallets.json`) for the agent using the skill; private keys not logged or sent except as signed payloads to the facilitator.
 - **Payments:** Only verify/settle go to the facilitator; no custody of funds by the MCP server.
-- **Whitelist:** Agent addresses must be allowlisted at the onboarding flow before paid tools succeed.
+- **Whitelist:** Addresses used by the agent must be allowlisted at the onboarding flow before paid tools succeed.
 
 ## Capability + adapters
 
-- **Capability:** Core (`src/`) — MCP client, x402 flow, local tools. No OpenAI/Claw/Anthropic logic in code.
-- **Adapters:** `adapters/` — how each platform uses the capability:
+- **Capability:** Core (`src/`) — MCP client, x402 flow, tools for agents. No OpenAI/Claw/Anthropic logic in code.
+- **Adapters:** `adapters/` — how each platform or marketplace loads the skill:
   - [adapters/openclaw/SKILL.md](adapters/openclaw/SKILL.md) — OpenClaw / Moltbot
   - [adapters/openai/openapi.yaml](adapters/openai/openapi.yaml) — Custom GPTs / Assistants
   - [adapters/anthropic/tools.json](adapters/anthropic/tools.json) — Claude tools
@@ -179,8 +179,8 @@ autonomous/
 ## Deployment order
 
 1. **x402 facilitator** — Use public (e.g. https://x402-navy.vercel.app/facilitator) for full demo; or run local and set X402_EVM_FACILITATOR_URL to public for link_bank_account.
-2. **MCP server** — x402-enabled (run locally or use Replit MCP URL).
-3. **Agent** — `node src/run-agent.js` or PM2 (`pm2 start ecosystem.config.cjs --only agent-autonomous` from repo root).
+2. **MCP server** — x402-enabled.
+3. **Skill runner (demo)** — `node src/run-agent.js` or PM2 (`pm2 start ecosystem.config.cjs --only agent-autonomous` from repo root).
 
 ## References
 

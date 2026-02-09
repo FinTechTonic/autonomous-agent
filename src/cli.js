@@ -44,7 +44,7 @@ function main() {
     return;
   }
 
-  // Default: run the agent (backward compatibility: npx cornerstone-autonomous-agent "some message")
+  // Default: run the skill demo (backward compatibility: npx cornerstone-autonomous-agent "some message")
   const runAgentPath = join(root, 'src/run-agent.js');
   const child = spawn(process.execPath, [runAgentPath, ...args], {
     stdio: 'inherit',

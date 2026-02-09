@@ -28,7 +28,7 @@ export async function buildAptosPaymentPayload(paymentRequirements, wallet) {
   // Aptos SDK parses payTo as address; empty string causes "Hex string is too short"
   if (!payTo || payTo.length < 32) {
     throw new Error(
-      'Payment requirements missing valid payTo address. Set APTOS_PAYTO_ADDRESS in server .env or register a pay_to address at http://localhost:4024/flow.html'
+      'Payment requirements missing valid payTo address. Set APTOS_PAYTO_ADDRESS in server .env or register a pay_to address at https://arnstein.ch/flow.html'
     );
   }
 

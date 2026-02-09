@@ -24,7 +24,7 @@ export function createMcpTools(mcpClient) {
     },
     {
       name: 'run_prediction',
-      description: 'Run stock prediction for a ticker. Returns prediction result. x402: pay with Aptos or EVM (server offers both).',
+      description: 'Run stock prediction for a ticker symbol. Returns forecast data with confidence intervals. Cost ~6c USDC via x402 (payment automatic). Prerequisite: funded + whitelisted Aptos or EVM wallet.',
       schema: z.object({
         symbol: z.string().describe('Stock symbol (e.g. AAPL)'),
         horizon: z.number().default(30).describe('Prediction horizon in days'),
@@ -44,7 +44,7 @@ export function createMcpTools(mcpClient) {
     },
     {
       name: 'run_backtest',
-      description: 'Run backtest for a trading strategy on a symbol. x402: pay with Aptos or EVM.',
+      description: 'Run backtest for a trading strategy on a symbol. Returns performance metrics (returns, drawdown, sharpe). Cost ~6c USDC via x402 (payment automatic). Prerequisite: funded + whitelisted Aptos or EVM wallet.',
       schema: z.object({
         symbol: z.string().describe('Stock symbol'),
         startDate: z.string().nullable().default(null).describe('Start date YYYY-MM-DD'),
@@ -61,7 +61,7 @@ export function createMcpTools(mcpClient) {
     },
     {
       name: 'link_bank_account',
-      description: 'Start bank linking flow (Plaid link). x402: pay with Aptos or EVM (e.g. Base Sepolia). Returns link_token or account id.',
+      description: 'Start Plaid bank linking flow. Returns link_token for the user to complete bank connection. Cost ~5c via x402 (payment automatic). Prerequisite: funded + whitelisted EVM wallet (Base Sepolia for testnet).',
       schema: z.object({}),
     }
   );
@@ -76,7 +76,7 @@ export function createMcpTools(mcpClient) {
     },
     {
       name: 'get_agent_reputation_score',
-      description: 'Get agent reputation score for an allowlisted wallet. Returns 200 with reputation_score (e.g. 100) or 403. x402 or lender credits.',
+      description: 'Get agent reputation score (ability to transact via x402) for an allowlisted wallet. Returns { reputation_score } or 403 if not allowlisted. Cost ~6c via x402, or free with lender credits (pass payer_wallet). Call get_wallet_addresses first to get the address.',
       schema: z.object({
         agent_address: z.string().optional().describe('Wallet to query (allowlisted agent)'),
         payer_wallet: z.string().optional().describe('When using lender credits, your registered paying wallet'),
@@ -94,7 +94,7 @@ export function createMcpTools(mcpClient) {
     },
     {
       name: 'get_borrower_score',
-      description: 'Get borrower score for an allowlisted agent. Returns 200 with score (100 or 100+X when bank linked). x402 or lender credits.',
+      description: 'Get borrower score (real borrower behavior) for an allowlisted wallet. Returns { score } (100 base, higher with bank linked). Cost ~6c via x402, or free with lender credits (pass payer_wallet).',
       schema: z.object({
         agent_address: z.string().optional().describe('Agent wallet to get score for'),
         payer_wallet: z.string().optional().describe('When using lender credits, your registered paying wallet'),
@@ -112,7 +112,7 @@ export function createMcpTools(mcpClient) {
     },
     {
       name: 'get_agent_reputation_score_by_email',
-      description: 'Get agent reputation score by email (resolves to allowlisted agent). Higher fee. Requires SCORE_BY_EMAIL_ENABLED. x402 or lender credits.',
+      description: 'Get agent reputation score by email (resolves email to allowlisted wallet). Higher fee than address-based lookup. Requires SCORE_BY_EMAIL_ENABLED on server. Returns { reputation_score } or error.',
       schema: z.object({
         email: z.string().describe('Email to resolve to an allowlisted agent'),
         payer_wallet: z.string().optional().describe('When using lender credits, your registered paying wallet'),
@@ -130,7 +130,7 @@ export function createMcpTools(mcpClient) {
     },
     {
       name: 'get_borrower_score_by_email',
-      description: 'Get borrower score by email (resolves to allowlisted agent). Higher fee. Requires SCORE_BY_EMAIL_ENABLED. x402 or lender credits.',
+      description: 'Get borrower score by email (resolves email to allowlisted wallet). Higher fee than address-based lookup. Requires SCORE_BY_EMAIL_ENABLED on server. Returns { score } or error.',
       schema: z.object({
         email: z.string().describe('Email to resolve to an allowlisted agent'),
         payer_wallet: z.string().optional().describe('When using lender credits, your registered paying wallet'),

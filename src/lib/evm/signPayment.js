@@ -26,7 +26,7 @@ export async function getEvmPaymentPayload(paymentRequirements) {
   const to = (paymentRequirements.payTo || '').trim();
   if (!to || !to.startsWith('0x') || to.length < 40) {
     throw new Error(
-      'Payment requirements missing valid payTo address. Set BASE_SEPOLIA_PAYTO in server .env or register a pay_to address at http://localhost:4024/flow.html'
+      'Payment requirements missing valid payTo address. Set BASE_SEPOLIA_PAYTO in server .env or register a pay_to address at https://arnstein.ch/flow.html'
     );
   }
   const value = BigInt(

@@ -381,4 +381,4 @@ Please refer to the respective license files for each component for full license
 ## Commercial Use
 
 This software may be used for commercial purposes in accordance with the terms above.
-For commercial licensing inquiries, please contact: contact@creditnexus.com
+For commercial licensing inquiries, please contact: sales@arnstein.ch

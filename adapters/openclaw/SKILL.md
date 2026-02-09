@@ -1,62 +1,73 @@
 ---
 name: autonomous-agent
-description: CreditNexus x402 agent. Use when the user wants stock predictions, backtests, bank linking, or agent/borrower scores. Payment-protected MCP tools (run_prediction, run_backtest, link_bank_account, get_agent_reputation_score, get_borrower_score, and by-email variants) with x402 flow (Aptos + Base). Agent handles 402 → pay → retry autonomously. Supports wallet attestation (signing) for onboarding.
+description: CornerStone MCP x402 skill for agents. Tools for stock predictions, backtests, bank linking, and agent/borrower scores. Payment-protected MCP tools with x402 flow (Aptos + Base). Skill handles 402 → pay → retry. Wallet attestation for onboarding. For marketplaces where agents download and use skills autonomously.
 metadata: {"openclaw":{"emoji":"📈","homepage":"https://github.com/FinTechTonic/autonomous-agent","requires":{"bins":["node","npm"]},"primaryEnv":"MCP_SERVER_URL","skillKey":"autonomous-agent"},"clawdbot":{"emoji":"📈","homepage":"https://github.com/FinTechTonic/autonomous-agent","requires":{"bins":["node","npm"]}}}
 ---
 
-# CreditNexus x402 Agent Skill
+# CornerStone MCP x402 Skill (for Agents)
 
-Autonomous agent that calls x402-protected MCP tools: stock prediction, backtest, bank linking, and agent/borrower scores. Handles payment flow (402 → pay → retry with `payment_payload`) with Aptos (prediction/backtest) and Base (banking). Supports **wallet attestation** (signing) for onboarding (POST /attest/aptos, /attest/evm).
+Skill that gives **agents** tools to call x402-protected MCP endpoints: stock prediction, backtest, bank linking, and agent/borrower scores. **Payment is automatic** — the skill handles 402 → sign → verify → settle → retry transparently. Supports **wallet attestation** (signing) for onboarding (POST /attest/aptos, /attest/evm).
 
 ## Installation
 
 Clone or copy the repo. When loaded from OpenClaw/MoltBook, the skill folder is `{baseDir}`; run commands from the **repo root** (parent of `adapters/openclaw` or of `skills/autonomous-agent`).
 
 ```bash
-# From repository root
 git clone https://github.com/FinTechTonic/autonomous-agent.git && cd autonomous-agent
 npm install
 ```
 
-Set `MCP_SERVER_URL` to your MCP server (e.g. `https://borrower.replit.app`). Copy `.env.example` to `.env` and set:
+Copy `.env.example` to `.env` and set:
 
-- `MCP_SERVER_URL` – MCP server base URL (MCP protocol at `/mcp`)
 - `X402_FACILITATOR_URL` – x402 facilitator (verify/settle)
 - `LLM_BASE_URL`, `HUGGINGFACE_API_KEY` or `HF_TOKEN`, `LLM_MODEL` – for inference
 - `APTOS_WALLET_PATH`, `EVM_WALLET_PATH` (or `EVM_PRIVATE_KEY`) – for payments
 
-## Run the agent
+## Quick-start workflow
 
-From the **repository root** (where `package.json` and `src/` live):
+1. `get_wallet_addresses()` – check what wallets exist.
+2. If empty: `create_aptos_wallet()` + `create_evm_wallet()`.
+3. Fund: `credit_aptos_wallet()` + `fund_evm_wallet()`.
+4. Whitelist addresses at https://arnstein.ch/flow.html.
+5. Check balances: `balance_aptos()`, `balance_evm({ chain: "baseSepolia" })`.
+6. Call paid tools: `run_prediction`, `run_backtest`, `link_bank_account`, or score tools.
+
+## Run the skill (demo)
 
 ```bash
 npx cornerstone-agent "Run a 30-day prediction for AAPL"
-# Or interactive
 npx cornerstone-agent
-# Or from repo: npm run agent -- "..." or node src/run-agent.js "..."
+npm run agent -- "..."
+node src/run-agent.js "..."
 ```
 
-**x402 flow:** Agent calls tool without `payment_payload` → server returns 402 + `paymentRequirements` → agent signs, facilitator verify/settle → agent retries with `payment_payload` → receives result + `paymentReceipt`.
-
 ## Wallet attestation (signing)
-
-To prove wallet ownership during onboarding, run from repo root:
 
 - Aptos: `npm run attest:aptos` or `npx cornerstone-agent-attest-aptos` — output to POST /attest/aptos
 - EVM: `npm run attest:evm` or `npx cornerstone-agent-attest-evm` — output to POST /attest/evm
 
-## MCP Tools
+## Tool reference
 
-All tools are on the MCP server at `/mcp`. See repo [MCP_INTEGRATION_REFERENCE.md](https://github.com/FinTechTonic/autonomous-agent/blob/main/MCP_INTEGRATION_REFERENCE.md) for resources and pricing.
+### Wallet tools (local)
+| Tool | Args | Returns |
+|------|------|---------|
+| `get_wallet_addresses` | none | `{ aptos: [{ address, network }], evm: [...] }` |
+| `create_aptos_wallet` | `{ force?, network? }` | `{ success, address, network }` |
+| `create_evm_wallet` | `{ force?, network? }` | `{ success, address, network }` |
+| `credit_aptos_wallet` | `{ amount_octas? }` | devnet: funds directly; testnet: `{ faucet_url, address }` |
+| `fund_evm_wallet` | none | `{ faucet_url, address, message }` |
+| `balance_aptos` | none | `{ address, balances: { usdc, apt } }` |
+| `balance_evm` | `{ chain? }` | `{ address, chain, balance, symbol }` |
 
-| Tool | Resource | Description | Cost |
-|------|----------|-------------|------|
-| `run_prediction` | `/mcp/prediction/{symbol}` | Stock prediction (symbol, horizon) | ~6¢ |
-| `run_backtest` | `/mcp/backtest/{symbol}` | Backtest (symbol, start/end, strategy) | ~6¢ |
-| `link_bank_account` | `/mcp/banking/link` | CornerStone/Plaid bank link token | ~5¢ (config) |
-| `get_agent_reputation_score` | `/mcp/scores/reputation` | Agent reputation (100 allowlisted); x402 or lender credits | ~6¢ |
-| `get_borrower_score` | `/mcp/scores/borrower` | Borrower score (100 or 100+Plaid); x402 or lender credits | ~6¢ |
-| `get_agent_reputation_score_by_email` | `/mcp/scores/reputation-by-email` | Reputation by email; requires SCORE_BY_EMAIL_ENABLED | base + extra |
-| `get_borrower_score_by_email` | `/mcp/scores/borrower-by-email` | Borrower score by email; requires SCORE_BY_EMAIL_ENABLED | base + extra |
+### Paid MCP tools (x402 — payment automatic)
+| Tool | Args | Returns | Cost |
+|------|------|---------|------|
+| `run_prediction` | `{ symbol, horizon? }` | Forecast data | ~6¢ |
+| `run_backtest` | `{ symbol, startDate?, endDate?, strategy? }` | Performance metrics | ~6¢ |
+| `link_bank_account` | none | `{ link_token }` | ~5¢ |
+| `get_agent_reputation_score` | `{ agent_address?, payer_wallet? }` | `{ reputation_score }` | ~6¢ or credits |
+| `get_borrower_score` | `{ agent_address?, payer_wallet? }` | `{ score }` | ~6¢ or credits |
+| `get_agent_reputation_score_by_email` | `{ email, payer_wallet? }` | `{ reputation_score }` | higher |
+| `get_borrower_score_by_email` | `{ email, payer_wallet? }` | `{ score }` | higher |
 
-Whitelist your agent at the onboarding flow (e.g. `MCP_SERVER_URL/flow.html`) so the server allows your wallet.
+Whitelist the addresses the agent uses at https://arnstein.ch/flow.html so the server allows those wallets.

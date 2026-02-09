@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: CreditNexus x402 MCP Tools
+  title: CornerStone MCP x402 Tools
   description: Payment-protected tools (run_prediction, run_backtest, open_bank_account, scores). Use x402 flow (402 → pay → retry with PAYMENT-SIGNATURE).
   version: 1.0.0
 servers:
-  - url: http://localhost:4023
-    description: MCP server (override with MCP_SERVER_URL)
+  - url: https://arnstein.ch/mcp
+    description: MCP server
 paths:
   /mcp/prediction/{symbol}:
     get:

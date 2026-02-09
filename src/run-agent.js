@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Entrypoint for the autonomous agent (x402 MCP + LangChain.js).
+ * Entrypoint for the skill demo (x402 MCP + LangChain.js runner).
  * Usage: node src/run-agent.js [message]
  * If no message, runs demo prompt.
  */
@@ -17,7 +17,7 @@ const DEMO_PROMPT =
 async function main() {
   const message = process.argv.slice(2).join(' ').trim() || DEMO_PROMPT;
 
-  const mcpServerUrl = process.env.MCP_SERVER_URL || 'http://localhost:4023';
+  const mcpServerUrl = process.env.MCP_SERVER_URL || 'https://arnstein.ch';
   const defaultFacilitator = 'https://x402-navy.vercel.app/facilitator';
   let facilitatorUrl = process.env.X402_FACILITATOR_URL || defaultFacilitator;
   if (facilitatorUrl.includes('facilitator.x402.org')) {

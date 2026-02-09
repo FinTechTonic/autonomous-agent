@@ -1,5 +1,6 @@
 /**
- * MCP client with x402 retry: uses official MCP SDK with StreamableHTTP transport.
+ * MCP client with x402 retry: uses official MCP SDK.
+ * Tries StreamableHTTP transport first; falls back to SSE if the server returns 405.
  * On 402 from tool call, pays via facilitator and retries in one shot (agent calls
  * the tool once; 402 + verify + settle + retry happen inside callTool; agent gets
  * final result or error, never 402).
@@ -7,6 +8,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { verifyPayment, settlePayment } from '../x402/index.js';
 
 /** Max time for a single callTool (connect + call + payment flow + retry); ms. MCP responses (e.g. prediction) can take > 1 min. */
@@ -21,9 +23,9 @@ function withTimeout(promise, ms, label) {
 
 /**
  * @param {Object} config
- * @param {string} config.baseUrl - MCP server base URL (e.g. http://localhost:4023)
+ * @param {string} config.baseUrl - MCP server base URL (e.g. https://arnstein.ch); client appends /mcp
  * @param {string} config.facilitatorUrl - x402 facilitator base URL (Aptos)
- * @param {string} [config.evmFacilitatorUrl] - facilitator for EVM (open_bank_account); defaults to facilitatorUrl (use public for EVM when Aptos is local)
+ * @param {string} [config.evmFacilitatorUrl] - facilitator for EVM (open_bank_account); defaults to facilitatorUrl
  * @param {(r: import('../x402/types.js').PaymentRequirements) => Promise<Object>} config.getAptosPaymentPayload
  * @param {(r: import('../x402/types.js').PaymentRequirements) => Promise<Object>} config.getEvmPaymentPayload
  * @param {number} [config.maxRetries]
@@ -43,7 +45,7 @@ export function createMcpClient(config) {
   let isConnected = false;
 
   /**
-   * Connect to MCP server
+   * Connect to MCP server (StreamableHTTP first, SSE fallback)
    */
   async function connect() {
     if (isConnected && mcpClient) {
@@ -51,24 +53,40 @@ export function createMcpClient(config) {
       return;
     }
 
-    console.log(`Connecting to MCP server at ${mcpUrl}`);
+    const clientInfo = { name: 'cornerstone-agent', version: '1.0.0' };
+    const clientOpts = { capabilities: {} };
+
+    // Try StreamableHTTP first
+    console.log(`Connecting to MCP server at ${mcpUrl} (StreamableHTTP)...`);
     try {
-      const transport = new StreamableHTTPClientTransport(
-        new URL(mcpUrl)
-      );
-
-      mcpClient = new Client({
-        name: 'cornerstone-agent',
-        version: '1.0.0',
-      }, {
-        capabilities: {},
-      });
-
+      const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+      mcpClient = new Client(clientInfo, clientOpts);
       await mcpClient.connect(transport);
       isConnected = true;
-      console.log('Successfully connected to MCP server');
+      console.log('Connected to MCP server via StreamableHTTP');
+      return;
     } catch (error) {
-      console.error('Failed to connect to MCP server:', error);
+      // 405 = server doesn't support StreamableHTTP, try SSE
+      if (error.code === 405 || error.message?.includes('405') || error.message?.includes('Method Not Allowed')) {
+        console.log('StreamableHTTP not supported, trying SSE transport...');
+        mcpClient = null;
+      } else {
+        console.error('Failed to connect to MCP server:', error);
+        throw error;
+      }
+    }
+
+    // Fallback: SSE transport (uses /sse endpoint by convention)
+    const sseUrl = `${baseUrl}/sse`;
+    console.log(`Connecting to MCP server at ${sseUrl} (SSE)...`);
+    try {
+      const transport = new SSEClientTransport(new URL(sseUrl));
+      mcpClient = new Client(clientInfo, clientOpts);
+      await mcpClient.connect(transport);
+      isConnected = true;
+      console.log('Connected to MCP server via SSE');
+    } catch (error) {
+      console.error('Failed to connect to MCP server (SSE):', error);
       throw error;
     }
   }
